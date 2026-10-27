@@ -268,13 +268,18 @@ Required when no configuration is given.
 
 
 **`--ota-port PORT`**
-: The device's OTA port, if a configuration file is not given. Defaults to `3232` (ESP32); ESP8266 uses `8266`,
-RP2040 `2040` and LibreTiny `8892`. Can't be used together with a configuration, whose own OTA settings apply.
+: The device's OTA port, if a configuration file is not given. Defaults to the platform's port, read from the image
+named by `--file`; see
+[Uploading a Prebuilt Image Without a Configuration](#uploading-a-prebuilt-image-without-a-configuration).
+An explicit port must be between 1 and 65535 and is used as given. Can't be used together with a configuration,
+whose own OTA settings apply.
 
 
 **`--ota-password PASSWORD`**
-: The device's OTA password, if it has one and a configuration file is not given. Can't be used together with a
-configuration, whose own OTA settings apply.
+: The device's OTA password, if it has one and a configuration file is not given. The `ESPHOME_OTA_PASSWORD`
+environment variable keeps it out of the shell history and the process list; if both are given, `--ota-password`
+is used. Can't be used together with a configuration, whose own OTA settings apply, and neither can
+`ESPHOME_OTA_PASSWORD`.
 
 
 **`--partition-table`**
@@ -319,11 +324,32 @@ esphome upload --file firmware.bin --device 192.168.1.50
 ```
 
 The image is sent directly over the [ESPHome OTA platform](/components/ota/esphome/); nothing is read, validated or
-compiled. If the device does not use the default OTA port for its platform or has an OTA password, give them with
-`--ota-port` and `--ota-password`:
+compiled.
+
+The OTA port defaults to the [ESPHome OTA platform](/components/ota/esphome/)'s default for the platform the image
+was built for, which is read from the image header:
+
+| Platform            | Default OTA port |
+| ------------------- | ---------------- |
+| ESP32               | `3232`           |
+| ESP8266             | `8266`           |
+| RP2040 and RP2350   | `2040`           |
+| BK72xx and RTL87xx  | `8892`           |
+| LN882x              | `8820`           |
+
+If the header does not name a platform, as with an original ESP32 factory image, the upload is refused and the
+port must be given with `--ota-port`. A device on a port other than its platform's default also needs `--ota-port`:
 
 ```shell
-esphome upload --file firmware.bin --device 192.168.1.50 --ota-port 8266 --ota-password secret
+esphome upload --file firmware.bin --device 192.168.1.50 --ota-port 6053
+```
+
+If the device has an OTA password, give it in the `ESPHOME_OTA_PASSWORD` environment variable, which keeps it out
+of the shell history, or with `--ota-password`. Like `ESPHOME_OTA_KEY`, the variable is removed from the
+environment before anything else runs.
+
+```shell
+ESPHOME_OTA_PASSWORD=secret esphome upload --file firmware.bin --device 192.168.1.50
 ```
 
 For a device that uses [OTA encryption](/components/ota/esphome/#encryption), give the key with `--prompt-ota-key`
