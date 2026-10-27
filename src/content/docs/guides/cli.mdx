@@ -278,8 +278,8 @@ whose own OTA settings apply.
 **`--ota-password PASSWORD`**
 : The device's OTA password, if it has one and a configuration file is not given. The `ESPHOME_OTA_PASSWORD`
 environment variable keeps it out of the shell history and the process list; if both are given, `--ota-password`
-is used. Can't be used together with a configuration, whose own OTA settings apply, and neither can
-`ESPHOME_OTA_PASSWORD`.
+is used. Neither it nor `ESPHOME_OTA_PASSWORD` can be used together with a configuration, whose own OTA settings
+apply.
 
 
 **`--partition-table`**
